@@ -7,7 +7,6 @@ type CommandPassword struct {
 	uid      int
 	home     string
 	is_root  bool
-	cmd      *ShellDebug
 }
 
 // 定义命令的结构体

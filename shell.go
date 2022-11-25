@@ -1,7 +1,6 @@
 package gcs
 
 import (
-	"io"
 	"os"
 	"os/exec"
 	"syscall"
@@ -50,18 +49,19 @@ func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, 
 
 	//也可以重定向文件 cmd.Stderr= fd (文件打开的描述符即可)
 
-	stdout, _ := cmd.StdoutPipe() //创建输出管道
-	defer stdout.Close()
-	if err := cmd.Start(); err != nil {
-		logger.Error("cmd.Start: %v")
-	}
+	// stdout, _ := cmd.StdoutPipe() //创建输出管道
+	// defer stdout.Close()
+	// if err := cmd.Start(); err != nil {
+	// 	logger.Error("cmd.Start: %v")
+	// }
 
-	if shells.debug {
-		cmdPid := cmd.Process.Pid //查看命令pid
-		logger.Debug("任务PID: ", cmdPid)
-	}
-	result, _ := io.ReadAll(stdout) // 读取输出结果
-	resdata := string(result)
+	// if shells.debug {
+	// 	cmdPid := cmd.Process.Pid //查看命令pid
+	// 	logger.Debug("任务PID: ", cmdPid)
+	// }
+	// result, _ := io.ReadAll(stdout) // 读取输出结果
+	// result, _ := ioutil.ReadAll(stdout) // 读取输出结果
+	resdata := string("result")
 
 	var res int
 	if err := cmd.Wait(); err != nil {
@@ -70,6 +70,6 @@ func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, 
 			res = ex.Sys().(syscall.WaitStatus).ExitStatus() //获取命令执行返回状态，相当于shell: echo $?
 		}
 	}
-
+	logger.Debug("执行状态: ", res)
 	return res, resdata, err
 }

@@ -23,8 +23,15 @@ func TestRunSudo(t *testing.T) {
 // 测试命令执行
 func TestRunCmd(t *testing.T) {
 	cc := ShellInit(true, true, true)
-	res := cc.Shell("ls", "ls")
-	if res {
+	res, _, _ := cc.GetStatusOutput("ipconfig")
+	if res == 0 {
+		logger.Info("执行成功")
+	} else {
+		logger.Error("执行失败")
+	}
+	ccs := ShellInit(true, true, true)
+	ress, _, _ := ccs.GetStatusOutput("ipconfisg")
+	if ress == 0 {
 		logger.Info("执行成功")
 	} else {
 		logger.Error("执行失败")

@@ -25,7 +25,6 @@ func SudoCommand(password string) *CommandPassword {
 	if c.user == "root" {
 		c.is_root = true
 	}
-	c.cmd = ShellInit(true, true, true)
 	return c
 }
 
