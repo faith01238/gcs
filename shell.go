@@ -37,26 +37,43 @@ func (shells *ShellDebug) GetStatusOutputBool(cmd, name string) (bool, string) {
 
 // 获取命令状态码及输出
 func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, err error) {
-
-	cmd := exec.Command("/bin/bash", "-c", cmds) //不加第一个第二个参数会报错
 	os_type := runtime.GOOS
-	if os_type == "windows"{
+	if strings.ToLower(os_type) == "windows" {
 		cmd := exec.Command("cmd", "/C", cmds) //不加第一个第二个参数会报错
-	}
-	if shells.prints {
-		cmd.Stdout = os.Stdout // cmd.Stdout -> stdout  重定向到标准输出，逐行实时打印
-	}
-	if shells.printer {
-		// 打印错误输出
+		if shells.prints {
+			cmd.Stdout = os.Stdout // cmd.Stdout -> stdout  重定向到标准输出，逐行实时打印
+		}
+		if shells.printer {
+			// 打印错误输出
+			cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
+		}
 		cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
-	}
-	cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
-	//也可以重定向文件 cmd.Stderr= fd (文件打开的描述符即可)
+		//也可以重定向文件 cmd.Stderr= fd (文件打开的描述符即可)
 
-	stdout, _ := cmd.StdoutPipe() //创建输出管道
-	defer stdout.Close()
-	result, _ := ioutil.ReadAll(stdout) // 读取输出结果
-	resdata := string(result)
-	cmd.Run()
-	return cmd.ProcessState.ExitCode(), resdata, err
+		stdout, _ := cmd.StdoutPipe() //创建输出管道
+		defer stdout.Close()
+		result, _ := ioutil.ReadAll(stdout) // 读取输出结果
+		resdata := string(result)
+		cmd.Run()
+		return cmd.ProcessState.ExitCode(), resdata, err
+	} else {
+		cmd := exec.Command("/bin/bash", "-c", cmds) //不加第一个第二个参数会报错
+		if shells.prints {
+			cmd.Stdout = os.Stdout // cmd.Stdout -> stdout  重定向到标准输出，逐行实时打印
+		}
+		if shells.printer {
+			// 打印错误输出
+			cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
+		}
+		cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
+		//也可以重定向文件 cmd.Stderr= fd (文件打开的描述符即可)
+
+		stdout, _ := cmd.StdoutPipe() //创建输出管道
+		defer stdout.Close()
+		result, _ := ioutil.ReadAll(stdout) // 读取输出结果
+		resdata := string(result)
+		cmd.Run()
+		return cmd.ProcessState.ExitCode(), resdata, err
+	}
+
 }
