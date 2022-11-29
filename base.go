@@ -3,6 +3,7 @@ package gcs
 import (
 	"fmt"
 	"log"
+	"os/exec"
 	"os/user"
 	"strconv"
 )
@@ -61,7 +62,7 @@ func GetUserInfo(display bool) (ok bool, username string, userid int, UserHome s
 
 // 检查命令是否存在
 func CheckCmd(cmd string) bool {
-	// var c string
-	c := "which " + cmd
-	return ExecCommand(c)
+	// 通过此函数可以从path变量查询命令是否存在，返回命令绝对路径和查找结果
+	_, err := exec.LookPath(cmd)
+	return err == nil
 }

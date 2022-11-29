@@ -42,7 +42,7 @@ func TestRunCmd(t *testing.T) {
 }
 
 func TestCheckCmd(t *testing.T) {
-	ls_ := CheckCmd("ls")
+	ls_ := CheckCmd("dir")
 	if ls_ {
 		logger.Info("存在")
 	} else {
