@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
+	"strings"
 
 	"gitee.com/liumou_site/logger"
 	"github.com/spf13/cast"
@@ -13,11 +15,10 @@ import (
 func (shells *ShellDebug) Shell(command string, name string) bool {
 	logger.Info("Commands run: ", command)
 	logger.Info("Task Name: ", name)
-	code, _, err := shells.GetStatusOutput(command)
-	if code == 0 {
+	status, _ := shells.GetStatusOutputBool(command)
+	if status {
 		return true
 	}
-	logger.Error(err)
 	return false
 }
 
@@ -38,9 +39,12 @@ func (shells *ShellDebug) GetStatusOutputBool(cmd, name string) (bool, string) {
 func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, err error) {
 
 	cmd := exec.Command("/bin/bash", "-c", cmds) //不加第一个第二个参数会报错
+	os_type := runtime.GOOS
+	if os_type == "windows"{
+		cmd := exec.Command("cmd", "/C", cmds) //不加第一个第二个参数会报错
+	}
 	if shells.prints {
 		cmd.Stdout = os.Stdout // cmd.Stdout -> stdout  重定向到标准输出，逐行实时打印
-
 	}
 	if shells.printer {
 		// 打印错误输出
