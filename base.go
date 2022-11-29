@@ -8,30 +8,25 @@ import (
 	"strconv"
 )
 
-// 这是创建sudo命令实例的构造函数
-
-func SudoCommand(password string) *CommandPassword {
-	c := new(CommandPassword)
-	c.password = password
+// 命令实例构造函数, 当不需要执行sudo命令的时候直接传入任意字符串给password即可
+func ShellInit(debug, prints, ptinter bool, password string) *ShellDebug {
+	shell := new(ShellDebug)
+	// 系统信息
+	shell.password = password
 	get, username, uid, u_home := GetUserInfo(false)
 	if get {
-		c.home = u_home
-		c.user = username
-		c.uid = uid
+		shell.home = u_home
+		shell.user = username
+		shell.uid = uid
 	} else {
-		c.home = "None"
-		c.user = "None"
-		c.uid = 10000
+		shell.home = "None"
+		shell.user = "None"
+		shell.uid = 10000
 	}
-	if c.user == "root" {
-		c.is_root = true
+	if shell.user == "root" {
+		shell.is_root = true
 	}
-	return c
-}
-
-// 命令实例构造函数
-func ShellInit(debug, prints, ptinter bool) *ShellDebug {
-	shell := new(ShellDebug)
+	// 调试开关
 	shell.debug = debug
 	shell.printer = ptinter
 	shell.prints = prints

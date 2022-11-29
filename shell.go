@@ -12,19 +12,14 @@ import (
 )
 
 // 执行命令并获取执行结果, 返回执行结果(成功/失败)
-func (shells *ShellDebug) Shell(command string, name string) bool {
+func (shells *ShellDebug) Shell(command string) bool {
 	logger.Info("Commands run: ", command)
-	logger.Info("Task Name: ", name)
 	status, _ := shells.GetStatusOutputBool(command)
-	if status {
-		return true
-	}
-	return false
+	return status
 }
 
 // 执行命令并获取输出数据, 返回执行结果布尔值 - (成功/失败)及 命令输出 (字符串)
-func (shells *ShellDebug) GetStatusOutputBool(cmd, name string) (bool, string) {
-	logger.Info(name)
+func (shells *ShellDebug) GetStatusOutputBool(cmd string) (bool, string) {
 	code, outs, err := shells.GetStatusOutput(cmd)
 	out := cast.ToString(outs)
 	if code == 0 {
