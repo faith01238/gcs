@@ -1,7 +1,7 @@
 package gcs
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -52,7 +52,7 @@ func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, 
 
 		stdout, _ := cmd.StdoutPipe() //创建输出管道
 		defer stdout.Close()
-		result, _ := ioutil.ReadAll(stdout) // 读取输出结果
+		result, _ := io.ReadAll(stdout) // 读取输出结果
 		resdata := string(result)
 		cmd.Run()
 		return cmd.ProcessState.ExitCode(), resdata, err
@@ -70,7 +70,7 @@ func (shells *ShellDebug) GetStatusOutput(cmds string) (excode int, out string, 
 
 		stdout, _ := cmd.StdoutPipe() //创建输出管道
 		defer stdout.Close()
-		result, _ := ioutil.ReadAll(stdout) // 读取输出结果
+		result, _ := io.ReadAll(stdout) // 读取输出结果
 		resdata := string(result)
 		cmd.Run()
 		return cmd.ProcessState.ExitCode(), resdata, err
