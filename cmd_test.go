@@ -54,7 +54,7 @@ func TestCheckCmd(t *testing.T) {
 func TestGetOut(t *testing.T) {
 	// 执行成功
 	cc := ShellInit(true, true, true, "1")
-	c := strings.Split("ls /home/liumou@ls /home/lll@lw /home/", "@")
+	c := strings.Split("ls /home/liumou@ls /home/lll@lw /home/@ls -la", "@")
 	for _, s := range c {
 		res, out, _ := cc.GetStatusOutputBool(s)
 		if res {
@@ -63,5 +63,20 @@ func TestGetOut(t *testing.T) {
 			logger.Error("执行失败")
 		}
 		fmt.Println(out)
+	}
+}
+
+// 测试实时刷新命令
+func TestRe(t *testing.T) {
+	// 执行成功
+	c := strings.Split("ls /home/liumou@lss", "@")
+	for _, s := range c {
+		code := ShellSystem(s)
+		if code != 0 {
+			logger.Error("执行失败")
+		} else {
+			logger.Info("执行成功")
+		}
+		logger.Debug("退出代码: ", code)
 	}
 }

@@ -2,14 +2,11 @@ package gcs
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
 	"gitee.com/liumou_site/logger"
-	"github.com/bitfield/script"
 	"github.com/spf13/cast"
 )
 
@@ -31,8 +28,7 @@ func (shells *ShellDebug) Shell(command string) bool {
 // 执行命令并获取输出数据, 返回执行结果布尔值 - (成功/失败)及 命令输出 (字符串)
 func (shells *ShellDebug) GetStatusOutputBool(cmd string) (bool, string, error) {
 	// code, outs, err := shells.ScriptGetStatusOutput(cmd)
-	code, outs, err := shellbase(cmd, shells.debug)
-	out := cast.ToString(outs)
+	code, out, err := shellbase(cmd, shells.debug)
 	if code == 0 {
 		return true, out, err
 	} else {
@@ -40,39 +36,6 @@ func (shells *ShellDebug) GetStatusOutputBool(cmd string) (bool, string, error) 
 		logger.Error("Execute command: ", cmd)
 	}
 	return false, out, err
-}
-
-// 使用第三方脚本二次开发
-func (shells *ShellDebug) ScriptGetStatusOutput(cmds string) (excode int, out string, err error) {
-	os_type := runtime.GOOS
-	if strings.ToLower(os_type) == "windows" {
-		cmd := exec.Command("cmd", "/C", cmds) //不加第一个第二个参数会报错
-		if shells.prints {
-			cmd.Stdout = os.Stdout // cmd.Stdout -> stdout  重定向到标准输出，逐行实时打印
-		}
-		if shells.printer {
-			// 打印错误输出
-			cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
-		}
-		cmd.Stderr = os.Stderr // cmd.Stderr -> stderr
-		//也可以重定向文件 cmd.Stderr= fd (文件打开的描述符即可)
-
-		stdout, _ := cmd.StdoutPipe() //创建输出管道
-		// defer stdout.Close()
-		result, _ := io.ReadAll(stdout) // 读取输出结果
-		resdata := string(result)
-		cmd.Run()
-		return cmd.ProcessState.ExitCode(), resdata, err
-	} else {
-		cmd := script.Exec(cmds)
-		res, _ := cmd.String()
-		code := cmd.ExitStatus()
-		if shells.prints {
-			logger.Debug("退出代码", code)
-		}
-		return code, res, cmd.Error()
-	}
-
 }
 
 // 执行命令基础模块
@@ -83,7 +46,7 @@ func shellbase(cmd string, debug bool) (excode int, out string, err error) {
 		return 0, "", fmt.Errorf("暂不支持当前系统")
 	} else {
 		// 创建命令实例
-		run_cmd := exec.Command("bash", "-c", cmd)
+		run_cmd := exec.Command("/bin/bash", "-c", cmd)
 		// 开始运行(使用堵塞方式)
 		err := run_cmd.Run()
 		// 获取执行状态码
@@ -101,4 +64,45 @@ func shellbase(cmd string, debug bool) (excode int, out string, err error) {
 		return exit_code, res, err
 	}
 
+}
+
+// 执行命令并实时获取输出
+// (excode int, out string, err error)
+func ShellSystem(command string) (code int) {
+	cmd := exec.Command("/bin/bash", "-c", command)
+	// 命令的错误输出和标准输出都连接到同一个管道
+	stdout, err := cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	if err != nil {
+		exit_code := cmd.ProcessState.ExitCode()
+		logger.Error("Error :", err)
+		logger.Debug("Execute command: ", command)
+		return exit_code
+	}
+	run_err := cmd.Start()
+	if run_err != nil {
+		exit_code := cmd.ProcessState.ExitCode()
+		logger.Error("Error :", err)
+		logger.Debug("Execute command: ", command)
+		return exit_code
+	}
+	// 从管道中实时获取输出并打印到终端
+	for {
+		tmp := make([]byte, 1024)
+		_, err := stdout.Read(tmp)
+		fmt.Print(string(tmp))
+		if err != nil {
+			break
+		}
+	}
+	wait_err := cmd.Wait()
+	exit_code := cmd.ProcessState.ExitCode()
+	if exit_code != 0 {
+		logger.Error(wait_err)
+		logger.Error("Error :", err)
+		logger.Debug("Execute command: ", command)
+		return exit_code
+	}
+	return exit_code
 }
