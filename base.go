@@ -58,3 +58,10 @@ func GetUserInfo(display bool) (ok bool, username string, userid int, UserHome s
 	}
 	return true, name, id, home
 }
+
+// 检查命令是否存在
+func CheckCmd(cmd string) bool {
+	// var c string
+	c := "which " + cmd
+	return ExecCommand(c)
+}
