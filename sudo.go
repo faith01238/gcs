@@ -17,7 +17,8 @@ func (shells *ShellDebug) ShellGetOutSudo(cmd string) (bool, string) {
 		cmd = c + cmd
 		logger.Debug("Generate Command: ", cmd)
 	}
-	return shells.GetStatusOutputBool(cmd)
+	status, out, _ := shells.GetStatusOutputBool(cmd)
+	return status, out
 }
 
 // 执行命令并获取执行结果, 返回执行结果(成功/失败)
